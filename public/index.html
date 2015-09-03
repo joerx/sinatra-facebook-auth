@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Facebook Login Example</title>
+<meta charset="utf-8">
+</head>
+
+<body>
+<script>
+
+  // handle result from FB.getLoginStatus
+  function handleStatusChange(response) {
+    console.log('status has changed fu');
+    console.log(response);
+    console.log('access token %s', response.authResponse.accessToken);
+
+    // response has status field that informs us about the users login status
+    if (response.status === 'connected') {
+      testApi();
+    } 
+    else if (response.status === 'not_authorized') {
+      document.getElementById('status').innerHTML = 'Authorize me plz!';
+    }
+    else {
+      document.getElementById('status').innerHTML = 'Logz into Fazebuk plz!';
+    }
+  }
+
+  function checkLoginState() {
+    FB.getLoginStatus(handleStatusChange);
+  }
+
+  window.fbAsyncInit = function() {
+    FB.init({
+      appId: '441872055999632',
+      cookie: true,
+      xfbml: true,
+      version: 'v2.4'
+    });
+    FB.getLoginStatus(handleStatusChange);
+  };
+
+  (function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+  }(document, 'script', 'facebook-jssdk'));
+
+  function testApi() {
+    console.log('Welcome. Fetching some data');
+    FB.api('/me', function(response) {
+      console.log('Login successful for', response.name);
+      document.getElementById('status').innerHTML = 'Thanks for logging in ' + response.name + '!';
+    });
+  } 
+</script>
+
+<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+</fb:login-button>
+
+<div id="status">
+</div>
+
+</body>
+</html>
