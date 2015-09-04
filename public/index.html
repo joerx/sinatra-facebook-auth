@@ -6,23 +6,24 @@
 </head>
 
 <body>
+<script type="text/javascript" src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
 <script>
 
   // handle result from FB.getLoginStatus
   function handleStatusChange(response) {
-    console.log('status has changed fu');
-    console.log(response);
+    console.log('status change', response);
     console.log('access token %s', response.authResponse.accessToken);
 
     // response has status field that informs us about the users login status
     if (response.status === 'connected') {
-      testApi();
+      $('#fb-login-button').hide();
+      getAppToken(response.authResponse.accessToken);
     } 
     else if (response.status === 'not_authorized') {
       document.getElementById('status').innerHTML = 'Authorize me plz!';
     }
     else {
-      document.getElementById('status').innerHTML = 'Logz into Fazebuk plz!';
+      document.getElementById('status').innerHTML = 'Logz intu Fezbuk plz!';
     }
   }
 
@@ -48,17 +49,33 @@
      fjs.parentNode.insertBefore(js, fjs);
   }(document, 'script', 'facebook-jssdk'));
 
-  function testApi() {
-    console.log('Welcome. Fetching some data');
-    FB.api('/me', function(response) {
-      console.log('Login successful for', response.name);
-      document.getElementById('status').innerHTML = 'Thanks for logging in ' + response.name + '!';
-    });
-  } 
+  function getAppToken(fbAccessToken) {
+    $.ajax({
+      url: '/token',
+      success: function(data, status, xhr) {
+        var $profile = $('#profile');
+        $('.name').text(data.name);
+        $('.email').text(data.email);
+        $('.fblink').attr('href', data.profileUrl);
+        $profile.show();
+      },
+      error: console.error,
+      dataType: 'json',
+      headers: {'Authorization': 'Facebook ' + fbAccessToken}
+    })
+  }
 </script>
 
-<fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
-</fb:login-button>
+<div id="fb-login-button">
+  <fb:login-button scope="public_profile,email" onlogin="checkLoginState();">
+  </fb:login-button>
+</div>
+
+<div id="profile" style="display:none">
+  <h2 class="name">$name</h2>
+  Email: <span class="email">$email</span><br/>
+  Facebook: <a href="#" class="fblink">Link</a>
+</div>
 
 <div id="status">
 </div>
